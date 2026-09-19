@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — CampusSphere</title>
+  
+  <style>
+    /* --- CSS Variables --- */
+    :root {
+      --bg-color: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --card-bg: #ffffff;
+      
+      /* Admin Specific Palette (Authoritative & Professional) */
+      --primary: #334155;     /* Slate */
+      --primary-hover: #1e293b;
+      --accent-blue: #2563eb; /* Action Blue */
+      --accent-blue-hover: #1d4ed8;
+      --border: #e2e8f0;
+      
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.dark-mode {
+      --bg-color: #020617;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: #0f172a;
+      --border: #1e293b;
+      --primary: #f8fafc;
+      --primary-hover: #e2e8f0;
+    }
+
+    /* --- Base Resets --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      transition: background-color 0.3s ease;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+
+    /* --- Global Navbar --- */
+    header.site-header {
+      background: var(--card-bg); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 1000; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .navbar {
+      max-width: 1200px; margin: 0 auto; padding: 1rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .navbar-brand { font-size: 1.5rem; font-weight: 800; color: var(--accent-blue); display: flex; align-items: center; gap: 0.5rem; }
+    .navbar-brand::after { content: 'ADMIN'; font-size: 0.6rem; background: var(--text-main); color: var(--card-bg); padding: 0.2rem 0.5rem; border-radius: 4px; letter-spacing: 1px;}
+    .navbar-links { display: flex; gap: 2rem; align-items: center; font-weight: 500; font-size: 0.95rem; }
+    .navbar-links a:hover { color: var(--accent-blue); }
+    
+    .theme-toggle {
+      background: var(--bg-color); border: 1px solid var(--border);
+      color: var(--text-main); padding: 0.4rem 1rem; border-radius: 20px;
+      cursor: pointer; font-weight: 600; transition: var(--transition);
+    }
+    .theme-toggle:hover { background: var(--border); }
+
+    /* --- Dashboard Hero Section --- */
+    .dashboard-hero {
+      position: relative;
+      background: linear-gradient(to right, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.5)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1600&q=80') center/cover;
+      color: white; padding: 4rem 2rem 8rem 2rem;
+    }
+    .hero-content {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 2rem;
+    }
+    .welcome-text h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .welcome-text p { color: #cbd5e1; font-size: 1.1rem; max-width: 500px; }
+    
+    /* Admin Profile Badge */
+    .user-badge {
+      display: flex; align-items: center; gap: 1rem;
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.75rem 1.5rem; border-radius: 50px; backdrop-filter: blur(10px);
+    }
+    .user-avatar { 
+      width: 50px; height: 50px; border-radius: 50%; 
+      background: var(--accent-blue); display: flex; justify-content: center; align-items: center;
+      font-weight: bold; font-size: 1.2rem; border: 2px solid white;
+    }
+    .user-info { display: flex; flex-direction: column; }
+    .user-name { font-weight: 700; font-size: 1.1rem; }
+    .user-role { font-size: 0.85rem; color: #93c5fd; text-transform: uppercase; letter-spacing: 1px;}
+
+    /* --- Quick Stats Strip --- */
+    .stats-container {
+      max-width: 1200px; margin: -4rem auto 3rem auto;
+      padding: 0 2rem; position: relative; z-index: 10;
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;
+    }
+    .stat-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      padding: 1.5rem; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+    }
+    .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--text-main); line-height: 1; margin-bottom: 0.5rem; }
+    .stat-label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* --- Admin Actions Grid --- */
+    .dashboard-main { max-width: 1200px; margin: 0 auto; padding: 0 2rem 4rem 2rem; }
+    .section-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem; color: var(--text-main); }
+    
+    .action-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .action-card {
+      position: relative; border-radius: 16px; overflow: hidden;
+      height: 220px; display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 1.5rem; text-decoration: none; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      transition: var(--transition); border: 1px solid var(--border);
+    }
+    .action-card:hover { transform: translateY(-5px); box-shadow: 0 15px 25px -5px rgba(0,0,0,0.15); }
+
+    /* Image Backgrounds */
+    .bg-notice { background: url('https://images.unsplash.com/photo-1588196749597-9ff046892e66?auto=format&fit=crop&w=600&q=80') center/cover; }
+    .bg-event { background: url('https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=600&q=80') center/cover; }
+    .bg-study { background: url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80') center/cover; }
+    .bg-lost { background: url('https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=600&q=80') center/cover; }
+    .bg-student { background: url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=600&q=80') center/cover; }
+    .bg-calendar { background: url('https://images.unsplash.com/photo-1506784962291-a15d73347f7a?auto=format&fit=crop&w=600&q=80') center/cover; }
+
+    /* Dark Overlay */
+    .action-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.6) 50%, rgba(15, 23, 42, 0.2) 100%);
+      z-index: 1; transition: var(--transition);
+    }
+    .action-card:hover::before { background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(37, 99, 235, 0.6) 100%); }
+
+    /* Card Content */
+    .card-content { position: relative; z-index: 2; color: white; }
+    .card-icon { font-size: 1.8rem; margin-bottom: 0.5rem; display: block; }
+    .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .card-desc { font-size: 0.9rem; color: #cbd5e1; margin-bottom: 1rem; line-height: 1.4; }
+    
+    .action-btn {
+      width: 100%; padding: 0.75rem; background: var(--accent-blue); color: white;
+      border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: var(--transition);
+    }
+    .action-btn:hover { background: var(--accent-blue-hover); }
+
+    /* --- Audit Log Table --- */
+    .table-container {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .table-header { padding: 1.5rem; border-bottom: 1px solid var(--border); }
+    .table-header h3 { font-size: 1.25rem; color: var(--text-main); }
+    
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 1rem 1.5rem; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); background: var(--bg-color); border-bottom: 1px solid var(--border); }
+    td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; color: var(--text-main); }
+    tbody tr:hover { background: rgba(0,0,0,0.02); }
+    
+    .badge-log { padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    .log-create { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .log-update { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+
+    /* --- Modals --- */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(5px);
+      display: flex; justify-content: center; align-items: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 2000;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    
+    .modal {
+      background: var(--card-bg); color: var(--text-main);
+      width: 90%; max-width: 500px; border-radius: 16px; padding: 2rem;
+      transform: translateY(20px); transition: transform 0.3s; position: relative;
+    }
+    .modal-overlay.active .modal { transform: translateY(0); }
+    .close-modal {
+      position: absolute; top: 1rem; right: 1rem; background: none; border: none;
+      font-size: 1.5rem; color: var(--text-muted); cursor: pointer;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg-color); color: var(--text-main); font-family: inherit;
+    }
+  </style>
+</head>
+<body data-page="admin_dashboard">
+
+  <header class="site-header">
+    <nav class="navbar">
+      <a href="home.html" class="navbar-brand">CampusSphere</a>
+      <ul class="navbar-links">
+        <li><a href="home.html">Student View</a></li>
+        <li><a href="#">Settings</a></li>
+        <li><a href="#">Logout</a></li>
+        <li><button class="theme-toggle" id="themeBtn">🌙 Dark</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="dashboard-hero">
+    <div class="hero-content">
+      <div class="welcome-text">
+        <span style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; font-weight: 700; color: #93c5fd;">System Administration</span>
+        <h1>Welcome, Admin 👋</h1>
+        <p>Manage campus notices, upcoming events, academic materials, and student records from your centralized control center.</p>
+      </div>
+      
+      <div class="user-badge">
+        <div class="user-avatar">A</div>
+        <div class="user-info">
+          <span class="user-name">Admin User</span>
+          <span class="user-role">Super Administrator</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-number">{{ student_count }}</span>
+        <span class="stat-label">Total Students</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ notice_count }}</span>
+        <span class="stat-label">Active Notices</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ event_count }}</span>
+        <span class="stat-label">Upcoming Events</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">{{ lost_count }}</span>
+        <span class="stat-label">Pending Lost Items</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="dashboard-main">
+    <h2 class="section-title">Content Management</h2>
+    
+    <div class="action-grid">
+      
+      <div class="action-card bg-notice">
+        <div class="card-content">
+          <span class="card-icon">📌</span>
+          <h3 class="card-title">Add Notice</h3>
+          <p class="card-desc">Publish a new official announcement for all students and staff.</p>
+          <a href="/admin/core/notice/add/" class="action-btn">
++ Create Notice
+</a>
+        </div>
+      </div>
+
+      <div class="action-card bg-event">
+        <div class="card-content">
+          <span class="card-icon">🎉</span>
+          <h3 class="card-title">Add Event</h3>
+          <p class="card-desc">Create a new listing for a campus fest, workshop, or seminar.</p>
+          <a href="/admin/core/studymaterial/add/" class="action-btn">
++ Upload File
+</a>
+        </div>
+      </div>
+
+      <div class="action-card bg-study">
+        <div class="card-content">
+          <span class="card-icon">📚</span>
+          <h3 class="card-title">Upload Material</h3>
+          <p class="card-desc">Share academic notes, slides, or syllabus PDFs by department.</p>
+          <button class="action-btn" onclick="openModal('Upload Study Material')">+ Upload File</button>
+        </div>
+      </div>
+
+      <div class="action-card bg-lost">
+        <div class="card-content">
+          <span class="card-icon">🔎</span>
+          <h3 class="card-title">Lost & Found</h3>
+          <p class="card-desc">Log a newly found item or review student-reported missing items.</p>
+          <button class="action-btn" onclick="openModal('Log Lost/Found Item')">+ Log Item</button>
+        </div>
+      </div>
+
+      <div class="action-card bg-student">
+        <div class="card-content">
+          <span class="card-icon">🎓</span>
+          <h3 class="card-title">Manage Students</h3>
+          <p class="card-desc">View, edit, or suspend registered student accounts and profiles.</p>
+          <button class="action-btn" onclick="alert('Navigating to Student Directory...')">View Directory</button>
+        </div>
+      </div>
+
+      <div class="action-card bg-calendar">
+        <div class="card-content">
+          <span class="card-icon">🗓️</span>
+          <h3 class="card-title">Academic Calendar</h3>
+          <p class="card-desc">Update exam dates, semester breaks, and official campus holidays.</p>
+          <a href="/admin/core/calendar/add/" class="action-btn">
+Update Calendar
+</a>
+        </div>
+      </div>
+
+    </div>
+
+    <h2 class="section-title">Audit Log</h2>
+    <div class="table-container">
+      <div class="table-header">
+        <h3 style="margin: 0; font-size: 1.1rem;">Recent Administrative Actions</h3>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Action Type</th>
+              <th>Content Item</th>
+              <th>Date / Time</th>
+              <th>Author</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge-log log-create">Created Notice</span></td>
+              <td style="font-weight: 600;">Semester Fee Deadline Extended</td>
+              <td>Jul 02, 2026 - 10:45 AM</td>
+              <td>Admin User</td>
+            </tr>
+            <tr>
+              <td><span class="badge-log log-create">Created Event</span></td>
+              <td style="font-weight: 600;">Tech Fest — CodeStorm 2026</td>
+              <td>Jun 30, 2026 - 02:15 PM</td>
+              <td>Admin User</td>
+            </tr>
+            <tr>
+              <td><span class="badge-log log-update">Uploaded File</span></td>
+              <td style="font-weight: 600;">DBMS Unit 4 — Normalization.pdf</td>
+              <td>Jun 28, 2026 - 11:30 AM</td>
+              <td>Dr. K. Sharma</td>
+            </tr>
+            <tr>
+              <td><span class="badge-log log-update">Updated Calendar</span></td>
+              <td style="font-weight: 600;">Mid-term Exams Rescheduled</td>
+              <td>Jun 25, 2026 - 09:00 AM</td>
+              <td>Admin User</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal">
+      <button class="close-modal" onclick="closeModal()">&times;</button>
+      <h2 id="modalTitle" style="margin-bottom: 1.5rem;">Action</h2>
+      <form onsubmit="event.preventDefault(); alert('Data saved successfully to database!'); closeModal();">
+        <div class="form-group">
+          <label>Title / Subject</label>
+          <input type="text" placeholder="Enter title..." required>
+        </div>
+        <div class="form-group">
+          <label>Category / Department</label>
+          <select required>
+            <option value="">Select an option...</option>
+            <option value="cs">Computer Science</option>
+            <option value="general">General / Campus Wide</option>
+            <option value="exams">Examinations</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Description Details</label>
+          <textarea rows="4" placeholder="Enter details..." required></textarea>
+        </div>
+        <button type="submit" class="action-btn" style="margin-top: 1rem;">Publish Content</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Dark Mode Toggle Logic
+    const themeBtn = document.getElementById('themeBtn');
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      themeBtn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light' : '🌙 Dark';
+    });
+
+    // Modal Logic
+    const adminModal = document.getElementById('adminModal');
+    const modalTitle = document.getElementById('modalTitle');
+
+    function openModal(titleText) {
+      modalTitle.innerText = titleText;
+      adminModal.classList.add('active');
+    }
+
+    function closeModal() {
+      adminModal.classList.remove('active');
+    }
+
+    // Close modal on background click
+    window.addEventListener('click', (e) => {
+      if (e.target === adminModal) {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>

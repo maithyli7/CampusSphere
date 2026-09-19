@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Materials — CampusSphere</title>
+  
+  <style>
+    /* --- CSS Variables for Global Theming --- */
+    :root {
+      --bg-color: #f0fdf4; /* Subtle green/academic tint */
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --card-bg: #ffffff;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --accent: #0ea5e9;
+      --border: #e2e8f0;
+      --file-pdf: #ef4444; /* Red for PDF */
+      --file-ppt: #f97316; /* Orange for PPT */
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Dark Mode Overrides */
+    body.dark-mode {
+      --bg-color: #0f172a;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: #1e293b;
+      --border: #334155;
+    }
+
+    /* --- Base Resets --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* --- Hero Header --- */
+    .header {
+      background: linear-gradient(to bottom, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1200&q=80') center/cover;
+      color: white;
+      padding: 5rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+    .header h1 { font-size: 3rem; margin-bottom: 0.5rem; font-weight: 800; }
+    .header p { font-size: 1.1rem; color: #cbd5e1; max-width: 600px; margin: 0 auto; }
+    
+    .theme-toggle {
+      position: absolute;
+      top: 1.5rem;
+      right: 2rem;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .theme-toggle:hover { background: white; color: #0f172a; }
+
+    /* --- Filter & Search Bar --- */
+    .container { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+    
+    .search-container {
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border-radius: 50px;
+      border: 2px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-main);
+      font-size: 1rem;
+      transition: var(--transition);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+
+    .filters {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 0.5rem 1.2rem;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* --- File Cards Grid --- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+    .card:hover { 
+      transform: translateY(-5px); 
+      box-shadow: 0 15px 20px -5px rgba(0, 0, 0, 0.1); 
+      border-color: var(--primary);
+    }
+    
+    .card-thumb {
+      width: 100%; height: 140px; 
+      object-fit: cover;
+      border-bottom: 3px solid var(--primary);
+    }
+    
+    .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; position: relative;}
+    
+    .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    
+    .category-badge {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      color: var(--text-muted); letter-spacing: 0.5px;
+    }
+    
+    .format-badge {
+      font-size: 0.7rem; font-weight: bold; padding: 0.2rem 0.6rem; border-radius: 4px; color: white;
+    }
+    .format-pdf { background-color: var(--file-pdf); }
+    .format-ppt { background-color: var(--file-ppt); }
+    
+    .card h3 { margin-bottom: 1.5rem; font-size: 1.2rem; color: var(--text-main); line-height: 1.4; }
+    
+    .card-actions { margin-top: auto; }
+    .btn-download {
+      display: block; width: 100%; padding: 0.75rem; border: none; border-radius: 8px;
+      background: rgba(79, 70, 229, 0.1); color: var(--primary);
+      cursor: pointer; font-weight: 700; text-align: center; transition: var(--transition);
+    }
+    .btn-download:hover { background: var(--primary); color: white; }
+
+    /* --- Toast Notification --- */
+    .toast {
+      position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
+      background: #10b981; color: white; padding: 1rem 2rem; border-radius: 50px;
+      font-weight: 600; box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+      transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1000;
+    }
+    .toast.show { bottom: 30px; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <button class="theme-toggle" id="themeBtn">🌙 Dark Mode</button>
+    <span style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; color: #a5b4fc; font-weight: 700;">Resources</span>
+    <h1>Study Materials</h1>
+    <p>Official notes, lecture slides, and reference material organized by subject for Andhra University students.</p>
+  </header>
+
+  <main class="container">
+    
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search by topic, e.g. 'Normalization' or 'XML'...">
+    </div>
+
+    <div class="filters" id="filterContainer">
+      <button class="filter-btn active" data-filter="all">All Subjects</button>
+      <button class="filter-btn" data-filter="dbms">DBMS</button>
+      <button class="filter-btn" data-filter="webtech">Web Tech</button>
+      <button class="filter-btn" data-filter="analytics">Business Analytics</button>
+      <button class="filter-btn" data-filter="os">Operating Systems</button>
+    </div>
+
+    <div class="grid" id="cardGrid">
+      {% for material in materials %}
+
+<article class="card" data-category="{{ material.subject|lower }}">
+
+    {% if material.image %}
+        <img src="{{ material.image }}"
+             class="card-thumb"
+             alt="{{ material.subject }}">
+    {% else %}
+        <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80"
+             class="card-thumb"
+             alt="Study Material">
+    {% endif %}
+
+    <div class="card-content">
+
+        <div class="meta-row">
+
+            <span class="category-badge">
+                {{ material.subject }}
+            </span>
+
+            <span class="format-badge format-pdf">
+                PDF
+            </span>
+
+        </div>
+
+        <h3 class="card-title">
+            {{ material.title }}
+        </h3>
+
+        <div class="card-actions">
+
+            <a href="{{ material.file.url }}"
+               class="btn-download"
+               download>
+                Download File
+            </a>
+
+        </div>
+
+    </div>
+
+</article>
+
+{% empty %}
+
+<h2>No study materials available.</h2>
+
+{% endfor %}
+      
+
+    </div>
+  </main>
+
+  <div id="toast" class="toast">⬇️ Downloading file...</div>
+
+  <script>
+    // 1. Dark Mode Logic
+    const themeBtn = document.getElementById('themeBtn');
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      themeBtn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
+
+    // 2. Dual Filtering Logic (Search Box + Category Chips)
+    const searchInput = document.getElementById('searchInput');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.card');
+    
+    let currentCategory = 'all';
+
+    // Function to apply both Search Text and Category filters simultaneously
+    function filterMaterials() {
+      const searchText = searchInput.value.toLowerCase();
+
+      cards.forEach(card => {
+        const titleText = card.querySelector('.card-title').innerText.toLowerCase();
+        const cardCategory = card.getAttribute('data-category');
+        
+        const matchesSearch = titleText.includes(searchText);
+        const matchesCategory = (currentCategory === 'all' || cardCategory === currentCategory);
+
+        if (matchesSearch && matchesCategory) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Listen to Search Input typing
+    searchInput.addEventListener('input', filterMaterials);
+
+    // Listen to Category Button clicks
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Update active button styles
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Set current category and run filter
+        currentCategory = btn.getAttribute('data-filter');
+        filterMaterials();
+      });
+    });
+
+    // 3. Simulated Download Toast
+    function triggerDownload(filename) {
+      const toast = document.getElementById('toast');
+      toast.innerText = `⬇️ Downloading: ${filename}`;
+      toast.classList.add('show');
+      
+      // Hide the toast after 3 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

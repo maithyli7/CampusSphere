@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lost & Found — CampusSphere</title>
+  
+  <style>
+    /* --- CSS Variables --- */
+    :root {
+      --bg-color: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --card-bg: #ffffff;
+      --primary: #3b82f6;
+      --border: #e2e8f0;
+      
+      /* Status Colors */
+      --found-color: #10b981; /* Green */
+      --found-bg: rgba(16, 185, 129, 0.1);
+      --lost-color: #ef4444; /* Red */
+      --lost-bg: rgba(239, 68, 68, 0.1);
+      
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.dark-mode {
+      --bg-color: #0f172a;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: #1e293b;
+      --border: #334155;
+    }
+
+    /* --- Base Resets --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* --- Hero Header --- */
+    .header {
+      background: linear-gradient(to right, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4)), url('https://images.unsplash.com/photo-1496317556649-f930d733eea3?auto=format&fit=crop&w=1200&q=80') center/cover;
+      color: white;
+      padding: 4rem 2rem;
+      text-align: center;
+      position: relative;
+      border-bottom: 5px solid var(--primary);
+    }
+    .header h1 { font-size: 2.8rem; margin-bottom: 0.5rem; font-weight: 800; }
+    .header p { font-size: 1.1rem; color: #cbd5e1; max-width: 600px; margin: 0 auto 1.5rem auto; }
+    
+    .theme-toggle {
+      position: absolute; top: 1.5rem; right: 2rem;
+      background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: white; padding: 0.5rem 1.2rem; border-radius: 30px;
+      cursor: pointer; backdrop-filter: blur(8px); font-weight: 600; transition: var(--transition);
+    }
+    .theme-toggle:hover { background: white; color: #0f172a; }
+
+    .btn-report {
+      background: var(--primary); color: white; border: none;
+      padding: 0.8rem 2rem; font-size: 1.1rem; font-weight: 700;
+      border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+      transition: var(--transition); display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-report:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6); }
+
+    /* --- Toolbar (Search & Filter) --- */
+    .container { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+    
+    .toolbar {
+      display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 3rem;
+      align-items: center;
+    }
+    .search-input {
+      width: 100%; max-width: 500px; padding: 1rem 1.5rem;
+      border-radius: 50px; border: 2px solid var(--border);
+      background: var(--card-bg); color: var(--text-main);
+      font-size: 1rem; transition: var(--transition);
+    }
+    .search-input:focus { outline: none; border-color: var(--primary); }
+
+    .filters { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+    .filter-btn {
+      padding: 0.5rem 1.5rem; border: 1px solid var(--border);
+      background: var(--card-bg); color: var(--text-muted);
+      border-radius: 20px; cursor: pointer; font-weight: 600; transition: var(--transition);
+    }
+    .filter-btn.active[data-filter="all"], .filter-btn:hover[data-filter="all"] { background: var(--primary); color: white; border-color: var(--primary); }
+    .filter-btn.active[data-filter="found"], .filter-btn:hover[data-filter="found"] { background: var(--found-color); color: white; border-color: var(--found-color); }
+    .filter-btn.active[data-filter="lost"], .filter-btn:hover[data-filter="lost"] { background: var(--lost-color); color: white; border-color: var(--lost-color); }
+
+    /* --- Cards Grid --- */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden; transition: var(--transition);
+      display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 15px 25px -5px rgba(0,0,0,0.1); }
+    
+    .card-img { width: 100%; height: 200px; object-fit: cover; position: relative; }
+    
+    .status-badge {
+      position: absolute; top: 1rem; right: 1rem;
+      padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 1px; color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .status-found { background-color: var(--found-color); }
+    .status-lost { background-color: var(--lost-color); }
+
+    .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+    .meta-info { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;}
+    .card h3 { margin-bottom: 0.5rem; font-size: 1.25rem; color: var(--text-main); }
+    .card p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+    
+    .btn-contact {
+      margin-top: auto; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;
+      background: transparent; color: var(--text-main); cursor: pointer;
+      font-weight: 600; text-align: center; transition: var(--transition);
+    }
+    .btn-contact:hover { border-color: var(--text-main); background: rgba(0,0,0,0.02); }
+
+    /* --- Modals --- */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(5px);
+      display: flex; justify-content: center; align-items: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 1000;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    
+    .modal {
+      background: var(--card-bg); color: var(--text-main);
+      width: 90%; max-width: 500px; border-radius: 16px; padding: 2rem;
+      transform: translateY(20px); transition: transform 0.3s; position: relative;
+    }
+    .modal-overlay.active .modal { transform: translateY(0); }
+    .close-modal {
+      position: absolute; top: 1rem; right: 1rem; background: none; border: none;
+      font-size: 1.5rem; color: var(--text-muted); cursor: pointer;
+    }
+
+    /* Form Styles inside Modal */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg-color); color: var(--text-main); font-family: inherit;
+    }
+    .submit-btn {
+      width: 100%; padding: 0.8rem; background: var(--primary); color: white;
+      border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <button class="theme-toggle" id="themeBtn">🌙 Dark Mode</button>
+    <span style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; color: #93c5fd; font-weight: 700;">Campus Community</span>
+    <h1>Lost & Found</h1>
+    <p>Help keep our campus connected. Report an item you've lost, or post an item you've found to return it to its owner.</p>
+    <button class="btn-report" id="openReportModal">➕ Report an Item</button>
+  </header>
+
+  <main class="container">
+    
+    <div class="toolbar">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search for keys, ID cards, electronics...">
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">All Items</button>
+        <button class="filter-btn" data-filter="found">Found Items</button>
+        <button class="filter-btn" data-filter="lost">Lost Items</button>
+      </div>
+    </div>
+
+    <div class="grid" id="cardGrid">
+      {% for item in items %}
+
+<article class="card" data-category="{{ item.status }}">
+
+    <div style="position: relative;">
+
+        {% if item.image %}
+            <img src="{{ item.image }}" alt="{{ item.item_name }}" class="card-img">
+        {% else %}
+            <img src="https://images.unsplash.com/photo-1496317556649-f930d733eea3?auto=format&fit=crop&w=600&q=80"
+                 alt="Lost Item"
+                 class="card-img">
+        {% endif %}
+
+        <span class="status-badge status-{{ item.status }}">
+            {{ item.status|title }}
+        </span>
+
+    </div>
+
+    <div class="card-content">
+
+        <span class="meta-info">
+            {{ item.location }} • {{ item.date|date:"d M Y" }}
+        </span>
+
+        <h3 class="card-title">
+            {{ item.item_name }}
+        </h3>
+
+        <p class="card-text">
+            {{ item.description }}
+        </p>
+
+        <button class="btn-contact">
+            Contact
+        </button>
+
+    </div>
+
+</article>
+
+{% empty %}
+
+<h2>No lost or found items available.</h2>
+
+{% endfor %}
+  </div>
+
+  <script>
+    // --- 1. Dark Mode Toggle ---
+    const themeBtn = document.getElementById('themeBtn');
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      themeBtn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
+
+    // --- 2. Live Filtering (Search + Categories) ---
+    const searchInput = document.getElementById('searchInput');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.card');
+    let currentFilter = 'all';
+
+    function runFilters() {
+      const searchTerm = searchInput.value.toLowerCase();
+
+      cards.forEach(card => {
+        const title = card.querySelector('.card-title').innerText.toLowerCase();
+        const category = card.getAttribute('data-category');
+        
+        const matchesSearch = title.includes(searchTerm);
+        const matchesCategory = (currentFilter === 'all' || category === currentFilter);
+
+        if (matchesSearch && matchesCategory) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', runFilters);
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.getAttribute('data-filter');
+        runFilters();
+      });
+    });
+
+    // --- 3. Modal Controls ---
+    const reportModal = document.getElementById('reportModal');
+    const contactModal = document.getElementById('contactModal');
+
+    document.getElementById('openReportModal').addEventListener('click', () => {
+      reportModal.classList.add('active');
+    });
+
+    function openContactModal(userName) {
+      document.getElementById('contactName').innerText = userName;
+      contactModal.classList.add('active');
+    }
+
+    function closeModals() {
+      reportModal.classList.remove('active');
+      contactModal.classList.remove('active');
+    }
+
+    // Close on background click
+    window.addEventListener('click', (e) => {
+      if (e.target === reportModal) reportModal.classList.remove('active');
+      if (e.target === contactModal) contactModal.classList.remove('active');
+    });
+  </script>
+</body>
+</html>

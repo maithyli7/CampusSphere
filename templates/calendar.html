@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academic Calendar — CampusSphere</title>
+  
+  <style>
+    /* --- CSS Variables for Global Theming --- */
+    :root {
+      --bg-color: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --card-bg: #ffffff;
+      --primary: #6366f1; /* Indigo */
+      --primary-hover: #4f46e5;
+      --border: #e2e8f0;
+      
+      /* Category Colors */
+      --color-exam: #ef4444; /* Red */
+      --color-holiday: #10b981; /* Green */
+      --color-semester: #3b82f6; /* Blue */
+      
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Dark Mode Overrides */
+    body.dark-mode {
+      --bg-color: #0f172a;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: #1e293b;
+      --border: #334155;
+    }
+
+    /* --- Base Resets --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* --- Hero Header --- */
+    .header {
+      background: linear-gradient(to bottom, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=1200&q=80') center/cover;
+      color: white;
+      padding: 5rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+    .header h1 { font-size: 3rem; margin-bottom: 0.5rem; font-weight: 800; }
+    .header p { font-size: 1.1rem; color: #cbd5e1; max-width: 600px; margin: 0 auto; }
+    
+    .theme-toggle {
+      position: absolute; top: 1.5rem; right: 2rem;
+      background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255,255,255,0.3);
+      color: white; padding: 0.5rem 1.2rem; border-radius: 30px;
+      cursor: pointer; backdrop-filter: blur(8px); font-weight: 600; transition: var(--transition);
+    }
+    .theme-toggle:hover { background: white; color: #0f172a; }
+
+    /* --- Toolbar (Search & Filter) --- */
+    .container { max-width: 1000px; margin: 0 auto; padding: 3rem 2rem; }
+    
+    .toolbar {
+      display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 4rem;
+      align-items: center;
+    }
+    .search-input {
+      width: 100%; max-width: 500px; padding: 1rem 1.5rem;
+      border-radius: 50px; border: 2px solid var(--border);
+      background: var(--card-bg); color: var(--text-main);
+      font-size: 1rem; transition: var(--transition);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .search-input:focus { outline: none; border-color: var(--primary); }
+
+    .filters { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+    .filter-btn {
+      padding: 0.5rem 1.5rem; border: 1px solid var(--border);
+      background: var(--card-bg); color: var(--text-muted);
+      border-radius: 20px; cursor: pointer; font-weight: 600; transition: var(--transition);
+    }
+    .filter-btn.active, .filter-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* --- Vertical Timeline Layout --- */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+    
+    /* The connecting vertical line */
+    .timeline::before {
+      content: ''; position: absolute; top: 0; bottom: 0; left: 3.5rem;
+      width: 2px; background: var(--border); z-index: 0;
+    }
+
+    .timeline-entry {
+      display: flex; gap: 2rem; margin-bottom: 3rem; position: relative; z-index: 1;
+      align-items: center; transition: var(--transition);
+    }
+
+    /* Date Badge (Left Side) */
+    .date-badge {
+      flex-shrink: 0; width: 4.5rem; height: 5rem;
+      background: var(--card-bg); border: 2px solid var(--primary);
+      border-radius: 12px; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .date-badge .month { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 1px; }
+    .date-badge .day { font-size: 1.8rem; font-weight: 800; color: var(--text-main); line-height: 1; }
+
+    /* Content Card (Right Side) */
+    .content-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem; flex-grow: 1; display: flex;
+      justify-content: space-between; align-items: center; gap: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); transition: var(--transition);
+    }
+    .timeline-entry:hover .content-card {
+      transform: translateX(5px); border-color: var(--primary);
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    }
+
+    .text-content { flex-grow: 1; }
+    
+    .meta-tag {
+      display: inline-block; font-size: 0.75rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;
+    }
+    .tag-exam { color: var(--color-exam); }
+    .tag-holiday { color: var(--color-holiday); }
+    .tag-semester { color: var(--color-semester); }
+
+    .content-card h3 { font-size: 1.3rem; color: var(--text-main); margin-bottom: 0.5rem; }
+    .content-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; }
+
+    /* Image Thumbnail */
+    .entry-img {
+      width: 120px; height: 120px; border-radius: 12px; object-fit: cover;
+      flex-shrink: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    /* Empty State */
+    .empty-state { text-align: center; padding: 4rem 0; display: none; }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .timeline::before { left: 1.5rem; }
+      .timeline { padding-left: 0; }
+      .timeline-entry { gap: 1rem; flex-direction: column; align-items: flex-start; }
+      .date-badge { width: 3rem; height: 3.5rem; flex-direction: row; gap: 0.5rem; padding: 0 10px; width: auto; border-radius: 8px; }
+      .date-badge .day { font-size: 1.2rem; }
+      .content-card { flex-direction: column-reverse; align-items: flex-start; width: 100%; margin-left: 2rem; }
+      .entry-img { width: 100%; height: 150px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <button class="theme-toggle" id="themeBtn">🌙 Dark Mode</button>
+    <span style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; color: #a5b4fc; font-weight: 700;">Plan Ahead</span>
+    <h1>Academic Calendar</h1>
+    <p>Track important exam schedules, campus holidays, and semester timelines for the current academic year.</p>
+  </header>
+
+  <main class="container">
+    
+    <div class="toolbar">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search for 'Mid-terms', 'Diwali', 'Registration'...">
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">Full Year</button>
+        <button class="filter-btn" data-filter="exam">Exams</button>
+        <button class="filter-btn" data-filter="holiday">Holidays</button>
+        <button class="filter-btn" data-filter="semester">Semester Events</button>
+      </div>
+    </div>
+
+    <div class="timeline" id="calendarList">
+      {% for calendar in calendars %}
+
+<div class="timeline-entry" data-category="{{ calendar.category }}">
+
+    <div class="date-badge">
+
+        <span class="month">
+            {{ calendar.date|date:"M" }}
+        </span>
+
+        <span class="day">
+            {{ calendar.date|date:"d" }}
+        </span>
+
+    </div>
+
+    <div class="content-card">
+
+        <div class="text-content">
+
+            <span class="meta-tag tag-{{ calendar.category }}">
+                {{ calendar.category|upper }}
+            </span>
+
+            <h3 class="entry-title">
+                {{ calendar.title }}
+            </h3>
+
+            <p class="entry-desc">
+                {{ calendar.description }}
+            </p>
+
+        </div>
+
+        {% if calendar.image %}
+            <img src="{{ calendar.image }}"
+                 class="entry-img"
+                 alt="{{ calendar.title }}">
+        {% else %}
+            <img src="https://images.unsplash.com/photo-1506784365847-bbad939e9335?auto=format&fit=crop&w=300&q=80"
+                 class="entry-img"
+                 alt="Calendar">
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% empty %}
+
+<div class="empty-state" style="display:block;">
+    <div class="empty-icon">📅</div>
+    <p>No calendar events available.</p>
+</div>
+
+{% endfor %}
+    </div>
+
+  </main>
+
+  <script>
+    // 1. Dark Mode Logic
+    const themeBtn = document.getElementById('themeBtn');
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      themeBtn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
+
+    // 2. Dual Filtering Logic (Search Box + Category Chips)
+    const searchInput = document.getElementById('searchInput');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const entries = document.querySelectorAll('.timeline-entry');
+    const emptyState = document.getElementById('emptyState');
+    
+    let currentCategory = 'all';
+
+    function filterCalendar() {
+      const searchText = searchInput.value.toLowerCase();
+      let visibleCount = 0;
+
+      entries.forEach(entry => {
+        const titleText = entry.querySelector('.entry-title').innerText.toLowerCase();
+        const descText = entry.querySelector('.entry-desc').innerText.toLowerCase();
+        const entryCategory = entry.getAttribute('data-category');
+        
+        const matchesSearch = titleText.includes(searchText) || descText.includes(searchText);
+        const matchesCategory = (currentCategory === 'all' || entryCategory === currentCategory);
+
+        if (matchesSearch && matchesCategory) {
+          entry.style.display = 'flex';
+          visibleCount++;
+        } else {
+          entry.style.display = 'none';
+        }
+      });
+
+      // Show empty state if no results found
+      emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    // Listen to Search Input
+    searchInput.addEventListener('input', filterCalendar);
+
+    // Listen to Category Buttons
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = btn.getAttribute('data-filter');
+        filterCalendar();
+      });
+    });
+  </script>
+</body>
+</html>

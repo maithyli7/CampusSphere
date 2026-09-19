@@ -1,0 +1,383 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard — CampusSphere</title>
+  
+  <style>
+    /* --- CSS Variables --- */
+    :root {
+      --bg-color: #f1f5f9;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --card-bg: #ffffff;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --border: #e2e8f0;
+      
+      --accent-notice: #eab308;
+      --accent-event: #ec4899;
+      --accent-study: #06b6d4;
+      --accent-lost: #ef4444;
+      --accent-cal: #10b981;
+      
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body.dark-mode {
+      --bg-color: #0f172a;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: #1e293b;
+      --border: #334155;
+    }
+
+    /* --- Base Resets --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      transition: background-color 0.3s ease;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+
+    /* --- Global Navbar --- */
+    header.site-header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .navbar {
+      max-width: 1200px; margin: 0 auto; padding: 1rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .navbar-brand { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+    .navbar-links { display: flex; gap: 2rem; align-items: center; font-weight: 500; font-size: 0.95rem; }
+    .navbar-links a:hover { color: var(--primary); }
+    
+    .theme-toggle {
+      background: var(--bg-color); border: 1px solid var(--border);
+      color: var(--text-main); padding: 0.4rem 1rem; border-radius: 20px;
+      cursor: pointer; font-weight: 600; transition: var(--transition);
+    }
+    .theme-toggle:hover { background: var(--border); }
+
+    /* --- Dashboard Hero Section --- */
+    .dashboard-hero {
+      position: relative;
+      background: linear-gradient(to right, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.4)), url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=80') center/cover;
+      color: white; padding: 4rem 2rem 8rem 2rem; /* Extra bottom padding for stat overlap */
+    }
+    .hero-content {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 2rem;
+    }
+    .welcome-text h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .welcome-text p { color: #cbd5e1; font-size: 1.1rem; }
+    
+    /* User Profile Badge */
+    .user-badge {
+      display: flex; align-items: center; gap: 1rem;
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.75rem 1.5rem; border-radius: 50px; backdrop-filter: blur(10px);
+    }
+    .user-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid white; }
+    .user-info { display: flex; flex-direction: column; }
+    .user-name { font-weight: 700; font-size: 1.1rem; }
+    .user-roll { font-size: 0.85rem; color: #94a3b8; font-family: monospace; letter-spacing: 0.5px;}
+
+    /* --- Quick Stats Strip --- */
+    .stats-container {
+      max-width: 1200px; margin: -4rem auto 3rem auto; /* Pulls it up into the hero */
+      padding: 0 2rem; position: relative; z-index: 10;
+    }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;
+    }
+    .stat-card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      padding: 1.5rem; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      transition: var(--transition);
+    }
+    .stat-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+    .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--primary); line-height: 1; margin-bottom: 0.5rem; }
+    .stat-label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* --- Dashboard Grid (Widgets) --- */
+    .dashboard-main { max-width: 1200px; margin: 0 auto; padding: 0 2rem 4rem 2rem; }
+    .widget-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;
+    }
+
+    .widget {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      display: flex; flex-direction: column; transition: var(--transition);
+    }
+    .widget:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+
+    /* Widget Header with Image */
+    .widget-header {
+      height: 100px; position: relative;
+      display: flex; align-items: flex-end; padding: 1.2rem;
+    }
+    .widget-header::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.2)); z-index: 1;
+    }
+    .widget-header h3 {
+      position: relative; z-index: 2; color: white; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* Specific Widget Backgrounds */
+    .bg-notices { background: url('https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=400&q=80') center/cover; }
+    .bg-events { background: url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=400&q=80') center/cover; }
+    .bg-study { background: url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=400&q=80') center/cover; }
+    .bg-lost { background: url('https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=400&q=80') center/cover; }
+    .bg-calendar { background: url('https://images.unsplash.com/photo-1506784962291-a15d73347f7a?auto=format&fit=crop&w=400&q=80') center/cover; }
+    .bg-actions { background: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80') center/cover; }
+
+    /* Widget Lists */
+    .widget-list { padding: 0; margin: 0; flex-grow: 1; }
+    .widget-list-item {
+      padding: 1rem 1.2rem; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      transition: background 0.2s; cursor: pointer;
+    }
+    .widget-list-item:hover { background: rgba(79, 70, 229, 0.05); }
+    .widget-list-item:last-child { border-bottom: none; }
+    
+    .item-title { font-weight: 600; font-size: 0.95rem; color: var(--text-main); }
+    .item-meta { font-size: 0.8rem; font-weight: 700; color: var(--primary); background: rgba(79, 70, 229, 0.1); padding: 0.2rem 0.6rem; border-radius: 6px; }
+
+    /* Action Buttons inside Lists */
+    .action-btn {
+      display: block; width: calc(100% - 2.4rem); margin: 1rem 1.2rem; padding: 0.8rem;
+      background: var(--bg-color); border: 1px solid var(--border); border-radius: 8px;
+      text-align: center; font-weight: 600; color: var(--text-main); cursor: pointer; transition: var(--transition);
+    }
+    .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* Widget Footer */
+    .widget-footer {
+      display: block; padding: 1rem; text-align: center;
+      background: var(--bg-color); border-top: 1px solid var(--border);
+      font-weight: 700; font-size: 0.9rem; color: var(--primary);
+      transition: var(--transition);
+    }
+    .widget-footer:hover { background: rgba(79, 70, 229, 0.1); }
+
+  </style>
+</head>
+<body data-page="student_dashboard">
+
+  <header class="site-header">
+  <nav class="navbar">
+
+    <a href="{% url 'home' %}" class="navbar-brand">
+        CampusSphere
+    </a>
+
+    <ul class="navbar-links">
+
+      <li>
+        <a href="{% url 'notices' %}">Notices</a>
+      </li>
+
+      <li>
+        <a href="{% url 'events' %}">Events</a>
+      </li>
+
+      <li>
+        <a href="{% url 'study_materials' %}">Study</a>
+      </li>
+
+      <li>
+        <a href="{% url 'calendar' %}">Calendar</a>
+      </li>
+
+      <li>
+        <a href="{% url 'logout' %}">Logout</a>
+      </li>
+
+      <li>
+        <button class="theme-toggle" id="themeBtn">
+            🌙 Dark
+        </button>
+      </li>
+
+    </ul>
+
+  </nav>
+</header>
+
+  <section class="dashboard-hero">
+    <div class="hero-content">
+      <div class="welcome-text">
+        <span style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; font-weight: 700; color: #a5b4fc;">Student Dashboard</span>
+        <h1>Welcome back, {{ student.name }} 👋</h1>
+        <p>Here's what's happening around campus today.</p>
+      </div>
+      
+      <div class="user-badge">
+        <img src="{% static 'images/default-avatar.png' %}" alt="Student">
+          <span class="user-name"><h3>{{ student.name }}</h3></span>
+          <span class="user-roll">{{ student.roll_number }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-number">3</span>
+        <span class="stat-label">New Notices</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">2</span>
+        <span class="stat-label">Upcoming Events</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">5</span>
+        <span class="stat-label">New Materials</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">1</span>
+        <span class="stat-label">Lost & Found Alert</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="dashboard-main">
+    <div class="widget-grid">
+
+      <article class="widget">
+        <div class="widget-header bg-notices">
+          <h3>📌 Latest Notices</h3>
+        </div>
+        <ul class="widget-list">
+          <li class="widget-list-item">
+            <span class="item-title">Semester Fee Deadline Extended</span>
+            <span class="item-meta">2 JUL</span>
+          </li>
+          <li class="widget-list-item">
+            <span class="item-title">Mid-term Timetable Released</span>
+            <span class="item-meta">30 JUN</span>
+          </li>
+          <li class="widget-list-item">
+            <span class="item-title">Library Timings Updated</span>
+            <span class="item-meta">28 JUN</span>
+          </li>
+        </ul>
+        <a href="{% url 'notices' %}"class="widget-footer">View All Notices &rarr;</a>
+      </article>
+
+      <article class="widget">
+        <div class="widget-header bg-events">
+          <h3>🎉 Upcoming Events</h3>
+        </div>
+        <ul class="widget-list">
+          <li class="widget-list-item">
+            <span class="item-title">Tech Fest — CodeStorm 2026</span>
+            <span class="item-meta">12 JUL</span>
+          </li>
+          <li class="widget-list-item">
+            <span class="item-title">Guest Lecture: Cloud Computing</span>
+            <span class="item-meta">15 JUL</span>
+          </li>
+          <li class="widget-list-item">
+            <span class="item-title">Cultural Fest Registration</span>
+            <span class="item-meta">22 JUL</span>
+          </li>
+        </ul>
+        <a href="{% url 'events' %}" class="widget-footer">View Event Calendar &rarr;</a>
+      </article>
+
+      <article class="widget">
+        <div class="widget-header bg-study">
+          <h3>📚 Recent Materials</h3>
+        </div>
+        <ul class="widget-list">
+          <li class="widget-list-item" onclick="alert('Downloading PDF...')">
+            <span class="item-title">DBMS Unit 4 — Normalization</span>
+            <span class="item-meta" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">PDF</span>
+          </li>
+          <li class="widget-list-item" onclick="alert('Downloading PPT...')">
+            <span class="item-title">Analytics — Pivot Tables</span>
+            <span class="item-meta" style="background: rgba(249, 115, 22, 0.1); color: #f97316;">PPT</span>
+          </li>
+          <li class="widget-list-item" onclick="alert('Downloading PDF...')">
+            <span class="item-title">Web Tech — XML Notes</span>
+            <span class="item-meta" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">PDF</span>
+          </li>
+        </ul>
+        <a href="{% url 'study_materials' %}"class="widget-footer">Browse Library &rarr;</a>
+      </article>
+
+      <article class="widget">
+        <div class="widget-header bg-lost">
+          <h3>🔎 Lost & Found</h3>
+        </div>
+        <ul class="widget-list">
+          <li class="widget-list-item">
+            <span class="item-title">Blue Water Bottle Found</span>
+            <span class="item-meta" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">FOUND</span>
+          </li>
+          <li class="widget-list-item">
+            <span class="item-title">Lost: Casio Calculator</span>
+            <span class="item-meta" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">LOST</span>
+          </li>
+        </ul>
+        <a href="{% url 'lost_found' %}" class="widget-footer">View Community Board &rarr;</a>
+      </article>
+
+      <article class="widget">
+        <div class="widget-header bg-calendar">
+          <h3>🗓️ Academic Calendar</h3>
+        </div>
+        <ul class="widget-list">
+          <li class="widget-list-item">
+            <span class="item-title">Mid-term Exams Begin</span>
+            <span class="item-meta">20 JUL</span>
+          </li>
+          <li class="widget-list-item">
+            <span class="item-title">Semester Break Starts</span>
+            <span class="item-meta">05 AUG</span>
+          </li>
+        </ul>
+        <a href="{% url 'calendar' %}" class="widget-footer">Full Academic Schedule &rarr;</a>
+      </article>
+
+      <article class="widget">
+        <div class="widget-header bg-actions">
+          <h3>⚡ Quick Actions</h3>
+        </div>
+        <div class="widget-list" style="padding-top: 0.5rem;">
+          <button class="action-btn" onclick="alert('Opening Report Form...')">Report a Lost Item</button>
+          <button class="action-btn" onclick="alert('Downloading Timetable...')">Download Timetable</button>
+          <button class="action-btn" onclick="alert('Navigating to IT Support...')">Contact IT Support</button>
+        </div>
+      </article>
+
+    </div>
+  </main>
+
+  <script>
+    // Dark Mode Toggle Logic
+    const themeBtn = document.getElementById('themeBtn');
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      themeBtn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light' : '🌙 Dark';
+    });
+  </script>
+</body>
+</html>

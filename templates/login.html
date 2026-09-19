@@ -1,0 +1,670 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CampusSphere | Student Login</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+
+min-height:100vh;
+
+background:
+linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.65)),
+url("https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=80");
+
+background-size:cover;
+background-position:center;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+
+}
+
+/* floating circles */
+
+body::before{
+
+content:"";
+
+position:absolute;
+
+width:350px;
+
+height:350px;
+
+background:#00bfff;
+
+border-radius:50%;
+
+top:-120px;
+
+left:-120px;
+
+filter:blur(90px);
+
+opacity:.4;
+
+}
+
+body::after{
+
+content:"";
+
+position:absolute;
+
+width:320px;
+
+height:320px;
+
+background:#2563eb;
+
+border-radius:50%;
+
+bottom:-100px;
+
+right:-100px;
+
+filter:blur(90px);
+
+opacity:.4;
+
+}
+
+/* Main Container */
+
+.container{
+
+width:1100px;
+
+height:650px;
+
+display:flex;
+
+background:rgba(255,255,255,.08);
+
+backdrop-filter:blur(20px);
+
+border-radius:25px;
+
+overflow:hidden;
+
+box-shadow:0 30px 70px rgba(0,0,0,.35);
+
+animation:fade .8s ease;
+
+position:relative;
+
+}
+
+@keyframes fade{
+
+from{
+opacity:0;
+transform:translateY(30px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+/* Left Side */
+
+.left{
+
+flex:1;
+
+padding:70px;
+
+color:white;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+background:
+linear-gradient(rgba(0,191,255,.25),rgba(37,99,235,.25));
+
+}
+
+.logo{
+
+font-size:42px;
+
+font-weight:700;
+
+margin-bottom:20px;
+
+}
+
+.logo span{
+
+color:#00e5ff;
+
+}
+
+.left h2{
+
+font-size:42px;
+
+margin-bottom:20px;
+
+line-height:1.3;
+
+}
+
+.left p{
+
+font-size:18px;
+
+line-height:1.8;
+
+color:#ddd;
+
+margin-bottom:40px;
+
+}
+
+.feature{
+
+display:flex;
+
+align-items:center;
+
+margin:18px 0;
+
+font-size:17px;
+
+}
+
+.feature i{
+
+font-size:22px;
+
+color:#00e5ff;
+
+margin-right:15px;
+
+}
+
+/* Right */
+
+.right{
+
+flex:1;
+
+background:white;
+
+padding:60px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+}
+
+.login-box{
+
+width:100%;
+
+max-width:380px;
+
+}
+
+.login-box h1{
+
+font-size:34px;
+
+margin-bottom:10px;
+
+color:#222;
+
+}
+
+.login-box p{
+
+color:#666;
+
+margin-bottom:35px;
+
+}
+
+/* Inputs */
+
+.input-group{
+
+margin-bottom:22px;
+
+position:relative;
+
+}
+
+.input-group i{
+
+position:absolute;
+
+left:18px;
+
+top:16px;
+
+color:#00a2ff;
+
+}
+
+.input-group input{
+
+width:100%;
+
+padding:15px 18px 15px 48px;
+
+border:1px solid #ddd;
+
+border-radius:12px;
+
+font-size:15px;
+
+outline:none;
+
+transition:.3s;
+
+}
+
+.input-group input:focus{
+
+border-color:#00bfff;
+
+box-shadow:0 0 15px rgba(0,191,255,.25);
+
+}
+
+.row{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+font-size:14px;
+
+margin-bottom:25px;
+
+}
+
+.row a{
+
+text-decoration:none;
+
+color:#00a2ff;
+
+font-weight:600;
+
+}
+
+.login-btn{
+
+width:100%;
+
+padding:15px;
+
+border:none;
+
+border-radius:12px;
+
+background:#00bfff;
+
+color:white;
+
+font-size:17px;
+
+font-weight:700;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.login-btn:hover{
+
+background:#0095d9;
+
+transform:translateY(-3px);
+
+}
+
+/* Divider */
+
+.divider{
+
+text-align:center;
+
+margin:30px 0;
+
+position:relative;
+
+color:#888;
+
+}
+
+.divider::before{
+
+content:"";
+
+position:absolute;
+
+left:0;
+
+top:50%;
+
+width:42%;
+
+height:1px;
+
+background:#ddd;
+
+}
+
+.divider::after{
+
+content:"";
+
+position:absolute;
+
+right:0;
+
+top:50%;
+
+width:42%;
+
+height:1px;
+
+background:#ddd;
+
+}
+
+.social{
+
+display:flex;
+
+gap:15px;
+
+}
+
+.social button{
+
+flex:1;
+
+padding:12px;
+
+border:none;
+
+border-radius:10px;
+
+cursor:pointer;
+
+font-size:18px;
+
+background:#f5f5f5;
+
+transition:.3s;
+
+}
+
+.social button:hover{
+
+background:#00bfff;
+
+color:white;
+
+}
+
+.back{
+
+display:block;
+
+margin-top:30px;
+
+text-align:center;
+
+text-decoration:none;
+
+color:#555;
+
+font-weight:600;
+
+}
+
+.back:hover{
+
+color:#00bfff;
+
+}
+
+.error{
+
+color:red;
+
+margin-bottom:15px;
+
+height:18px;
+
+font-size:14px;
+
+}
+
+@media(max-width:900px){
+
+.container{
+
+flex-direction:column;
+
+width:95%;
+height:auto;
+
+}
+
+.left{
+
+display:none;
+
+}
+
+.right{
+
+padding:40px;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="left">
+
+<div class="logo">
+Campus<span>Sphere</span>
+</div>
+
+<h2>Welcome Back!</h2>
+
+<p>
+
+Access your academic dashboard, notices,
+study materials, attendance,
+results and campus updates in one place.
+
+</p>
+
+<div class="feature">
+<i class="fas fa-book"></i>
+Study Materials
+</div>
+
+<div class="feature">
+<i class="fas fa-calendar-alt"></i>
+Academic Calendar
+</div>
+
+<div class="feature">
+<i class="fas fa-bullhorn"></i>
+Latest Notices
+</div>
+
+<div class="feature">
+<i class="fas fa-users"></i>
+Campus Events
+</div>
+
+</div>
+
+<div class="right">
+
+<div class="login-box">
+
+<h1>Student Login</h1>
+
+<p>Login to continue to CampusSphere</p>
+
+<form method="POST">
+    {% csrf_token %}
+
+<div class="input-group">
+
+<i class="fas fa-id-card"></i>
+
+<input
+type="text"
+name="username"
+id="reg"
+placeholder="Username">
+
+</div>
+
+<div class="input-group">
+
+<i class="fas fa-lock"></i>
+
+<input
+type="password"
+name="password"
+id="pwd"
+placeholder="Password">
+
+</div>
+
+<div class="row">
+
+<label>
+<input type="checkbox">
+Remember Me
+</label>
+
+<a href="#">
+Forgot Password?
+</a>
+
+</div>
+
+<div class="error">
+    {% if error %}
+        {{ error }}
+    {% endif %}
+</div>
+
+<button class="login-btn">
+Login
+</button>
+
+</form>
+
+<div class="divider">
+OR
+</div>
+
+<div class="social">
+
+<button>
+<i class="fab fa-google"></i>
+</button>
+
+<button>
+<i class="fab fa-microsoft"></i>
+</button>
+
+<button>
+<i class="fab fa-github"></i>
+</button>
+
+</div>
+
+<a href="{% url 'home' %}" class="back">
+← Back to Home
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function login(){
+
+let reg=document.getElementById("reg").value.trim();
+
+let pwd=document.getElementById("pwd").value.trim();
+
+let err=document.getElementById("err");
+
+if(reg=="" || pwd==""){
+
+err.innerHTML="Please fill in all fields.";
+
+return false;
+
+}
+
+alert("Login Successful!");
+
+window.location.href="student_dashboard.html";
+
+return false;
+
+}
+
+</script>
+
+</body>
+</html>

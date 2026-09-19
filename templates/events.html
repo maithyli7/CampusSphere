@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events — CampusSphere</title>
+  
+  <style>
+    /* --- CSS Variables for Global Theming --- */
+    :root {
+      --bg-color: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --card-bg: #ffffff;
+      --primary: #0ea5e9;
+      --primary-hover: #0284c7;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --border: #e2e8f0;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Dark Mode Overrides */
+    body.dark-mode {
+      --bg-color: #0f172a;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-bg: #1e293b;
+      --border: #334155;
+    }
+
+    /* --- Base Resets --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* --- Hero Header --- */
+    .header {
+      background: linear-gradient(to right, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.6)), url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80') center/cover;
+      color: white;
+      padding: 5rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+    .header h1 { font-size: 3rem; margin-bottom: 0.5rem; font-weight: 800; letter-spacing: -1px; }
+    .header p { font-size: 1.1rem; color: #cbd5e1; max-width: 600px; margin: 0 auto; }
+    
+    .theme-toggle {
+      position: absolute;
+      top: 1.5rem;
+      right: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .theme-toggle:hover { background: white; color: #0f172a; }
+
+    /* --- Filter Bar --- */
+    .container { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+    .filters {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 0.6rem 1.5rem;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    }
+
+    /* --- Event Cards Grid --- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .card:hover { 
+      transform: translateY(-8px); 
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
+    }
+    
+    .card img { width: 100%; height: 200px; object-fit: cover; }
+    .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+    
+    .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .badge {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      color: var(--primary); background: rgba(14, 165, 233, 0.1);
+      padding: 0.25rem 0.75rem; border-radius: 20px; letter-spacing: 0.5px;
+    }
+    .date { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    
+    .card h3 { margin-bottom: 0.75rem; font-size: 1.35rem; color: var(--text-main); line-height: 1.3; }
+    .card p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.6; }
+    
+    .card-actions { margin-top: auto; display: flex; gap: 1rem; }
+    .btn {
+      flex: 1; padding: 0.6rem; border: none; border-radius: 8px;
+      cursor: pointer; font-weight: 600; text-align: center; transition: var(--transition);
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+    .btn-outline:hover { border-color: var(--text-main); }
+
+    /* --- Modal Popup --- */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px);
+      display: flex; justify-content: center; align-items: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    
+    .modal {
+      background: var(--card-bg); color: var(--text-main);
+      width: 90%; max-width: 500px; border-radius: 16px; padding: 2.5rem;
+      transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+    .modal-overlay.active .modal { transform: scale(1); }
+    .close-modal {
+      position: absolute; top: 1rem; right: 1.5rem; background: none;
+      border: none; font-size: 2rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s;
+    }
+    .close-modal:hover { color: var(--text-main); }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <button class="theme-toggle" id="themeBtn">🌙 Dark Mode</button>
+    <span style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.85rem; color: var(--primary); font-weight: 700;">What's On</span>
+    <h1>Campus Events</h1>
+    <p>Discover fests, workshops, seminars, and club activities happening across the university this month.</p>
+  </header>
+
+  <main class="container">
+    <div class="filters" id="filterContainer">
+      <button class="filter-btn active" data-filter="all">All Events</button>
+      <button class="filter-btn" data-filter="tech">Tech</button>
+      <button class="filter-btn" data-filter="cultural">Cultural</button>
+      <button class="filter-btn" data-filter="workshop">Workshop</button>
+      <button class="filter-btn" data-filter="sports">Sports</button>
+    </div>
+
+    <div class="grid" id="cardGrid">
+    {% for event in events %}
+
+<article class="card">
+
+    {% if event.image %}
+        <img src="{{ event.image }}" alt="{{ event.title }}">
+    {% else %}
+        <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80" alt="Event">
+    {% endif %}
+
+    <div class="card-content">
+
+        <div class="card-header-flex">
+            <span class="badge">Event</span>
+
+            <span class="date">
+                {{ event.date|date:"d M Y" }}
+            </span>
+        </div>
+
+        <h3 class="card-title">
+            {{ event.title }}
+        </h3>
+
+        <p class="card-text">
+            {{ event.description }}
+        </p>
+
+        <p>
+            📍 {{ event.location }}
+        </p>
+
+        <div class="card-actions">
+
+            <button class="btn btn-primary register-btn">
+                Register
+            </button>
+
+            <button class="btn btn-outline detail-btn">
+                Details
+            </button>
+
+        </div>
+
+    </div>
+
+</article>
+
+{% empty %}
+
+<h2>No upcoming events.</h2>
+
+{% endfor %}
+
+</div>
+
+
+  <script>
+    // --- 1. Dark Mode Logic ---
+    const themeBtn = document.getElementById('themeBtn');
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      themeBtn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
+
+    // --- 2. Live Filtering Logic ---
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.card');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Toggle active button styling
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Filter cards
+        const filterValue = btn.getAttribute('data-filter');
+        cards.forEach(card => {
+          if (filterValue === 'all' || card.getAttribute('data-category') === filterValue) {
+            card.style.display = 'flex';
+            // Slight animation reset
+            card.style.animation = 'none';
+            card.offsetHeight; /* trigger reflow */
+            card.style.animation = null; 
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // --- 3. Dynamic Modal Logic ---
+    const detailBtns = document.querySelectorAll('.detail-btn, .register-btn');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const closeModal = document.getElementById('closeModal');
+    
+    // Elements inside the modal to update dynamically
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalBadge = document.getElementById('modalBadge');
+
+    detailBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        // Extract data from the parent card
+        const card = e.target.closest('.card');
+        const title = card.querySelector('.card-title').innerText;
+        const text = card.querySelector('.card-text').innerText;
+        const category = card.querySelector('.badge').innerText;
+        const date = card.querySelector('.date').innerText;
+
+        // Populate the modal
+        modalTitle.innerText = title;
+        modalBadge.innerText = category;
+        modalBody.innerHTML = `<strong>Date:</strong> ${date} <br><br> ${text} <br><br><em>(Note: In a production environment, this data would be fetched from the Django backend via AJAX or rendered securely on the server.)</em>`;
+
+        // Display modal
+        modalOverlay.classList.add('active');
+      });
+    });
+
+    // Close logic
+    closeModal.addEventListener('click', () => modalOverlay.classList.remove('active'));
+    modalOverlay.addEventListener('click', (e) => {
+      if(e.target === modalOverlay) modalOverlay.classList.remove('active');
+    });
+  </script>
+</body>
+</html>
